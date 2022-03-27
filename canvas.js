@@ -7,7 +7,7 @@ new Vue({
 
     // フィールドのサイズ
       const fieldCol = 10;
-      const fieldRow = 20;
+      const fieldRow = 5;
 
     // ブロックのサイズ
       const blockSize = 50;
@@ -48,13 +48,14 @@ new Vue({
       for (let y = 0; y < fieldRow; y++) {
         field[y] = [];
         for (let x = 0; x < fieldCol; x++) {
-          field[y][x] = 0;
+          field[y][x] = false;
         }
       }
       // 障害物
-      field[5][8] = 1;
-      field[19][0] = 1;
-      field[19][9] = 1;
+      field[0][0] = true;
+      field[0][fieldCol-1] = true;
+      field[fieldRow-1][0] = true;
+      field[fieldRow-1][fieldCol-1] = true;
     }
 
     init();
@@ -95,12 +96,13 @@ new Vue({
     }
 
     // 移動できるかチェック
-    function checkMove(mx, my) {
+    function checkMove(mx, my, nTetro) {
+      if(nTetro == undefined) nTetro = tetro;
       for (let y = 0; y < tetroSize; y++) {
         for (let x = 0; x < tetroSize; x++) {
           let nx = tetroX + mx + x;
           let ny = tetroY + my + y;
-          if(tetro[y][x]) {
+          if(nTetro[y][x]) {
             if(
               nx >= fieldCol ||
               nx < 0 ||
@@ -112,6 +114,18 @@ new Vue({
         }
       }
       return true;
+    }
+
+    // テトロミノを回転する
+    function rotate() {
+      let nTetro = [];
+      for (let y = 0; y < tetroSize; y++) {
+        nTetro[y] = [];
+          for (let x = 0; x < tetroSize; x++) {
+            nTetro[y][x] = tetro[tetroSize-x-1][y];
+          }
+      }
+      return nTetro;
     }
 
     // キーボードが押されたときの処理
@@ -130,6 +144,8 @@ new Vue({
 					if(checkMove(0, 1))tetroY++;
 					break;
 				case 32:
+          let nTetro = rotate();
+          if(checkMove(0, 0, nTetro))tetro = nTetro;
 					break;
 			}
       drawField();
